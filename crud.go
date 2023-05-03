@@ -1,7 +1,7 @@
 package rest
 
 import (
-	"gitlab.sintezis.co/sintezis/sdk/web/dmp"
+	"github.com/GoLangWebSDK/dmp"
 
 	"gorm.io/gorm"
 )

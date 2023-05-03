@@ -1,10 +1,10 @@
-module gitlab.sintezis.co/sintezis/sdk/web/rest
+module github.com/GoLangWebSDK/rest
 
 go 1.20
 
 require (
+	github.com/GoLangWebSDK/dmp v0.0.0-20230503171548-341d2289eaaa
 	github.com/gorilla/mux v1.8.0
-	gitlab.sintezis.co/sintezis/sdk/web/dmp v0.0.0-20230324181400-dcb09a48cae7
 	gorm.io/gorm v1.24.7-0.20230306060331-85eaf9eeda11
 )
 

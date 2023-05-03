@@ -1,3 +1,5 @@
+github.com/GoLangWebSDK/dmp v0.0.0-20230503171548-341d2289eaaa h1:4bzkKv1L03Wspkez2tWbuJRhh/RsDtD+tWCiDn3jOHw=
+github.com/GoLangWebSDK/dmp v0.0.0-20230503171548-341d2289eaaa/go.mod h1:MIgziQErwGh6NBgbPIjTQA1rYzuIEjNHJtVutnDf25E=
 github.com/coreos/go-systemd/v22 v22.3.3-0.20220203105225-a9a7ef127534/go.mod h1:Y58oyj3AT4RCenI/lSvhwexgC+NSVTIJ3seZv2GcEnc=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
@@ -55,8 +57,6 @@ github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO
 github.com/stretchr/testify v1.8.1 h1:w7B6lhMri9wdJUVmEZPGGhZzrYTPvgJArz7wNPgYKsk=
 github.com/stretchr/testify v1.8.1/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
-gitlab.sintezis.co/sintezis/sdk/web/dmp v0.0.0-20230324181400-dcb09a48cae7 h1:Qe+AP/AwWfKtMzvwaCBhaSRZPAaVuDIxphPJ78J93KQ=
-gitlab.sintezis.co/sintezis/sdk/web/dmp v0.0.0-20230324181400-dcb09a48cae7/go.mod h1:fbxunf8nawKAMra2OPako0yptgY+G4WopCEMo1ux4dc=
 gitlab.sintezis.co/sintezis/sdk/web/erlog v0.0.0-20230321144318-b2d2d76ace40 h1:RhkABvVPlWDQncgtQ4wbnR6ch5NTWljqE080caEOTxo=
 gitlab.sintezis.co/sintezis/sdk/web/erlog v0.0.0-20230321144318-b2d2d76ace40/go.mod h1:vPrsPyS2142uxHtRXJf7vSCyi3F5TTrGcG1I+l1Gw/U=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
