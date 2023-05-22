@@ -3,9 +3,9 @@ module github.com/GoLangWebSDK/rest
 go 1.20
 
 require (
-	github.com/GoLangWebSDK/dmp v0.0.0-20230503171548-341d2289eaaa
+	github.com/GoLangWebSDK/dmp v0.0.0-20230509224727-3282d28a8e5a
 	github.com/gorilla/mux v1.8.0
-	gorm.io/gorm v1.24.7-0.20230306060331-85eaf9eeda11
+	gorm.io/gorm v1.25.0
 )
 
 require (
@@ -19,12 +19,11 @@ require (
 	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-sqlite3 v1.14.15 // indirect
-	github.com/rs/zerolog v1.29.0 // indirect
-	gitlab.sintezis.co/sintezis/sdk/web/erlog v0.0.0-20230321144318-b2d2d76ace40 // indirect
+	github.com/rs/zerolog v1.29.1 // indirect
 	golang.org/x/crypto v0.6.0 // indirect
 	golang.org/x/sys v0.5.0 // indirect
 	golang.org/x/text v0.7.0 // indirect
-	gorm.io/driver/mysql v1.4.7 // indirect
+	gorm.io/driver/mysql v1.5.0 // indirect
 	gorm.io/driver/postgres v1.5.0 // indirect
-	gorm.io/driver/sqlite v1.4.4 // indirect
+	gorm.io/driver/sqlite v1.5.0 // indirect
 )
