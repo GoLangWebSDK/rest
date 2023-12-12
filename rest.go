@@ -15,8 +15,8 @@ type Routes interface {
 type Rest struct {
 	Mux               *mux.Router
 	SubRouter         *mux.Router
-	CurrentController Controller
-	MapedController   controller
+	CurrentController *RestController
+	MapedController   Controller
 }
 
 func NewRouter() *Rest {
@@ -24,15 +24,8 @@ func NewRouter() *Rest {
 	return &Rest{
 		Mux:               router,
 		SubRouter:         nil,
-		CurrentController: Controller{},
+		CurrentController: &RestController{},
 		MapedController:   nil,
-	}
-}
-
-func (rest *Rest) Load(routes Routes) {
-	if routes != nil {
-		routes.LoadRoutes()
-		routes.LoadMiddlewares()
 	}
 }
 
@@ -80,7 +73,14 @@ func (rest *Rest) Init() {
 	rest.Mux.HandleFunc(rest.CurrentController.Path, handler).Methods(rest.CurrentController.Methods...)
 }
 
-func (rest *Rest) MapController(ctrl controller) *Rest {
+func (rest *Rest) Load(routes Routes) {
+	if routes != nil {
+		routes.LoadRoutes()
+		routes.LoadMiddlewares()
+	}
+}
+
+func (rest *Rest) MapController(ctrl Controller) *Rest {
 	rest.MapedController = ctrl
 	rest.SubRouter = rest.Mux.PathPrefix(rest.CurrentController.Path).Subrouter()
 	rest.MapedController.Init(rest)
