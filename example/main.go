@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/GoLangWebSDK/rest"
+	"github.com/GoLangWebSDK/rest/example/app"
 )
 
 func main() {
@@ -30,7 +31,7 @@ func main() {
 		fmt.Println("Post /products")
 	})
 
-	// router.Load(app.NewRoutes())
+	router.Load(app.NewRoutes())
 
 	err := http.ListenAndServe(":8080", router.Mux)
 	if err != nil {
