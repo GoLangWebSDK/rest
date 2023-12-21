@@ -1,103 +1,84 @@
 package rest
 
 import (
-	"github.com/GoLangWebSDK/dmp"
+	"net/http"
 
-	"gorm.io/gorm"
+	"github.com/GoLangWebSDK/crud"
 )
 
 type CRUDController[T any] struct {
 	Controller
-	Repository *dmp.Repository[T]
-	Model      T
+	Repository crud.Repository[T]
 }
 
-func (ctrl *CRUDController[T]) Run() {
-	ctrl.Repository = dmp.NewRepository(ctrl.Model)
+func NewCRUDController[T any](repo crud.Repository[T]) *CRUDController[T] {
+	return &CRUDController[T]{
+		Repository: repo,
+	}
 }
 
 func (ctrl *CRUDController[T]) Create(ctx *Context) {
-	var input T
-	err := ctx.JsonDecode(&input)
+	var record T
 
+	err := ctx.JsonDecode(&record)
 	if err != nil {
-		ctx.Response.WriteHeader(400)
+		ctx.SetStatus(http.StatusBadRequest)
 		return
 	}
 
-	err = ctrl.Repository.Add(input)
-
+	newRecord, err := ctrl.Repository.Create(record)
 	if err != nil {
-		ctx.Response.WriteHeader(500)
+		ctx.SetStatus(http.StatusInternalServerError)
 		return
 	}
 
-	ctx.Response.WriteHeader(201)
-}
-
-func (ctrl *CRUDController[T]) Read(ctx *Context) {
-	ctx.SetContentType("application/json")
-	ID := ctx.GetID()
-	result, err := ctrl.Repository.Get(ID)
-
-	if err != nil {
-		ctx.JsonResponse(404, "Not found.")
-		return
-	}
-
-	ctx.JsonResponse(200, result)
+	ctx.JsonResponse(http.StatusCreated, newRecord)
 }
 
 func (ctrl *CRUDController[T]) ReadAll(ctx *Context) {
-	ctx.SetContentType("application/json")
-	results, err := ctrl.Repository.GetAll()
-
+	records, err := ctrl.Repository.ReadAll()
 	if err != nil {
-		ctx.JsonResponse(500, "Internal server error.")
+		ctx.SetStatus(http.StatusInternalServerError)
 		return
 	}
 
-	ctx.JsonResponse(200, results)
+	ctx.JsonResponse(http.StatusOK, records)
+}
+
+func (ctrl *CRUDController[T]) Read(ctx *Context) {
+	record, err := ctrl.Repository.Read(ctx.GetID())
+	if err != nil {
+		ctx.JsonResponse(http.StatusNotFound, nil)
+		return
+	}
+
+	ctx.JsonResponse(http.StatusOK, record)
 }
 
 func (ctrl *CRUDController[T]) Update(ctx *Context) {
-	ID := ctx.GetID()
-	var input T
+	var record T
 
-	err := ctx.JsonDecode(&input)
-
+	err := ctx.JsonDecode(&record)
 	if err != nil {
-		ctx.Response.WriteHeader(400)
+		ctx.SetStatus(http.StatusBadRequest)
 		return
 	}
 
-	err = ctrl.Repository.Update(ID, input)
-
+	updatedRecord, err := ctrl.Repository.Update(ctx.GetID(), record)
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			ctx.JsonResponse(404, "Not found.")
-			return
-		}
-		ctx.JsonResponse(500, "Internal server error.")
+		ctx.SetStatus(http.StatusInternalServerError)
 		return
 	}
 
-	ctx.Response.WriteHeader(200)
+	ctx.JsonResponse(http.StatusOK, updatedRecord)
 }
 
 func (ctrl *CRUDController[T]) Destroy(ctx *Context) {
-	ID := ctx.GetID()
-
-	err := ctrl.Repository.Delete(ID)
-
+	err := ctrl.Repository.Delete(ctx.GetID())
 	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			ctx.JsonResponse(404, "Not found.")
-			return
-		}
-		ctx.Response.WriteHeader(500)
+		ctx.Response.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	ctx.Response.WriteHeader(200)
+	ctx.Response.WriteHeader(http.StatusOK)
 }

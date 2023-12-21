@@ -1,113 +1,99 @@
 package rest
 
 import (
-	"net/http"
-
 	"github.com/gorilla/mux"
 )
 
-type HandlerFunc func(ctx *Context)
-type Routes interface {
-	LoadRoutes()
-	LoadMiddlewares()
-}
-
 type Rest struct {
-	Mux               *mux.Router
-	SubRouter         *mux.Router
-	CurrentController *RestController
-	MapedController   Controller
+	Mux                *mux.Router
+	SubRouter          *mux.Router
+	controllers        []MappedController
+	currentScheme      string
+	currentHost        string
+	currentRoutePrefix string
+	currentRoute       string
+	currentHandler     RestHandler
 }
 
 func NewRouter() *Rest {
-	router := mux.NewRouter()
+	m := mux.NewRouter()
 	return &Rest{
-		Mux:               router,
-		SubRouter:         nil,
-		CurrentController: &RestController{},
-		MapedController:   nil,
+		Mux:         m,
+		SubRouter:   m,
+		controllers: []MappedController{},
 	}
-}
-
-func (rest *Rest) Init() {
-
-	if rest.MapedController != nil {
-
-		rest.MapedController.Run()
-
-		s := rest.Mux.PathPrefix(rest.CurrentController.Path).Subrouter()
-
-		GetHandler := func(w http.ResponseWriter, r *http.Request) {
-			rest.MapedController.Read(NewContext(w, r))
-		}
-
-		GetAllHandler := func(w http.ResponseWriter, r *http.Request) {
-			rest.MapedController.ReadAll(NewContext(w, r))
-		}
-
-		PostHandler := func(w http.ResponseWriter, r *http.Request) {
-			rest.MapedController.Create(NewContext(w, r))
-		}
-
-		PutHandler := func(w http.ResponseWriter, r *http.Request) {
-			rest.MapedController.Update(NewContext(w, r))
-		}
-
-		DeleteHandler := func(w http.ResponseWriter, r *http.Request) {
-			rest.MapedController.Destroy(NewContext(w, r))
-		}
-
-		s.HandleFunc("/", GetAllHandler).Methods("GET")
-		s.HandleFunc("/{id}", GetHandler).Methods("GET")
-		s.HandleFunc("/", PostHandler).Methods("POST")
-		s.HandleFunc("/{id}", PutHandler).Methods("PUT")
-		s.HandleFunc("/{id}", DeleteHandler).Methods("DELETE")
-
-		return
-	}
-
-	handler := func(w http.ResponseWriter, r *http.Request) {
-		rest.CurrentController.Handler(NewContext(w, r))
-	}
-
-	rest.Mux.HandleFunc(rest.CurrentController.Path, handler).Methods(rest.CurrentController.Methods...)
 }
 
 func (rest *Rest) Load(routes Routes) {
 	if routes != nil {
-		routes.LoadRoutes()
-		routes.LoadMiddlewares()
+		routes.LoadRoutes(rest)
+		routes.LoadMiddlewares(rest)
 	}
 }
 
-func (rest *Rest) MapController(ctrl Controller) *Rest {
-	rest.MapedController = ctrl
-	rest.SubRouter = rest.Mux.PathPrefix(rest.CurrentController.Path).Subrouter()
-	rest.MapedController.Init(rest)
+func (rest *Rest) Schemes(scheme string) *Rest {
+	rest.currentScheme = scheme
 	return rest
 }
 
-func (rest *Rest) Controller(handler HandlerFunc) *Rest {
-	rest.CurrentController.Handler = handler
+func (rest *Rest) Host(host string) *Rest {
+	rest.currentHost = host
+	return rest
+}
+
+func (rest *Rest) RoutePrefix(prefix string) *Rest {
+	rest.currentRoutePrefix = prefix + rest.currentRoutePrefix
+	return rest
+}
+
+func (rest *Rest) API(version ...string) *Rest {
+	rest.currentRoutePrefix = "/api/" + version[0] + rest.currentRoutePrefix
+	return rest
+}
+
+func (rest *Rest) StrictSlash(value bool) *Rest {
+	rest.Mux.StrictSlash(value)
 	return rest
 }
 
 func (rest *Rest) Route(route string) *Rest {
-	rest.CurrentController.Path = route
+	rest.currentRoute = route
 	return rest
 }
 
-func (rest *Rest) Methods(methods ...string) *Rest {
-	rest.CurrentController.Methods = append(rest.CurrentController.Methods, methods...)
-	return rest
+func (rest *Rest) Controller(ctrl RestHandler) {
+	rest.currentHandler = ctrl
+	rest.mapRoute()
+	rest.mapControllerHandlers()
 }
 
-func (rest *Rest) Listen(port string) error {
-	err := http.ListenAndServe(port, rest.Mux)
+func (rest *Rest) mapRoute() {
+	pathPrefix := rest.currentRoute
 
-	if err != nil {
-		return err
+	if rest.currentRoutePrefix != "" {
+		pathPrefix = rest.currentRoutePrefix + rest.currentRoute
+		rest.currentRoutePrefix = ""
 	}
 
-	return nil
+	route := rest.Mux.PathPrefix(pathPrefix)
+
+	if rest.currentScheme != "" {
+		route = rest.Mux.Schemes(rest.currentScheme)
+	}
+
+	if rest.currentHost != "" {
+		route = rest.Mux.Host(rest.currentHost)
+	}
+
+	rest.SubRouter = route.Subrouter()
+}
+
+func (rest *Rest) mapControllerHandlers() {
+	ctrl := NewMappedController(rest)
+
+	rest.controllers = append(rest.controllers, ctrl)
+
+	for _, ctrl := range rest.controllers {
+		ctrl.Map()
+	}
 }
