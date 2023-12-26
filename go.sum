@@ -1,4 +1,2 @@
-github.com/GoLangWebSDK/crud v0.0.0-20231212225711-110c5825f2c1 h1:LYAqSW3c3HYVUL16DTp4LN6CnUME8+a2OdYuVNoaTAE=
-github.com/GoLangWebSDK/crud v0.0.0-20231212225711-110c5825f2c1/go.mod h1:nicnNwEJPgzzXwEyZBBXx+wanvgdSCg97c3UU4z/Q6U=
 github.com/gorilla/mux v1.8.0 h1:i40aqfkR1h2SlN9hojwV5ZA91wcXFOvkdNIeFDP5koI=
 github.com/gorilla/mux v1.8.0/go.mod h1:DVbg23sWSpFRCP0SfiEN6jmj59UnW/n46BH5rLB71So=
