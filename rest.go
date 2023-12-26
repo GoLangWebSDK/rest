@@ -42,12 +42,16 @@ func (rest *Rest) Host(host string) *Rest {
 }
 
 func (rest *Rest) RoutePrefix(prefix string) *Rest {
-	rest.currentRoutePrefix = prefix + rest.currentRoutePrefix
+	rest.currentRoutePrefix = prefix
 	return rest
 }
 
 func (rest *Rest) API(version ...string) *Rest {
-	rest.currentRoutePrefix = "/api/" + version[0] + rest.currentRoutePrefix
+	if len(version) != 0 {
+		rest.currentRoutePrefix = "/api/" + version[0]
+		return rest
+	}
+	rest.currentRoutePrefix = "/api"
 	return rest
 }
 
@@ -72,17 +76,16 @@ func (rest *Rest) mapRoute() {
 
 	if rest.currentRoutePrefix != "" {
 		pathPrefix = rest.currentRoutePrefix + rest.currentRoute
-		rest.currentRoutePrefix = ""
 	}
 
 	route := rest.Mux.PathPrefix(pathPrefix)
 
 	if rest.currentScheme != "" {
-		route = rest.Mux.Schemes(rest.currentScheme)
+		route = route.Schemes(rest.currentScheme)
 	}
 
 	if rest.currentHost != "" {
-		route = rest.Mux.Host(rest.currentHost)
+		route = route.Host(rest.currentHost)
 	}
 
 	rest.SubRouter = route.Subrouter()
