@@ -1,83 +1,84 @@
 package rest
 
-// import (
-// 	"net/http"
-// 	"sdk-test/sdk/crud"
-// )
+import (
+	"net/http"
 
-// type CRUDController[T any] struct {
-// 	Controller
-// 	Repository crud.Repository[T]
-// }
+	"github.com/GoLangWebSDK/crud"
+)
 
-// func NewCRUDController[T any](repo crud.Repository[T]) *CRUDController[T] {
-// 	return &CRUDController[T]{
-// 		Repository: repo,
-// 	}
-// }
+type CRUDController[T any] struct {
+	Controller
+	Repository crud.Repository[T]
+}
 
-// func (ctrl *CRUDController[T]) Create(ctx *Context) {
-// 	var record T
+func NewCRUDController[T any](repo crud.Repository[T]) *CRUDController[T] {
+	return &CRUDController[T]{
+		Repository: repo,
+	}
+}
 
-// 	err := ctx.JsonDecode(&record)
-// 	if err != nil {
-// 		ctx.SetStatus(http.StatusBadRequest)
-// 		return
-// 	}
+func (ctrl *CRUDController[T]) Create(ctx *Context) {
+	var record T
 
-// 	newRecord, err := ctrl.Repository.Create(record)
-// 	if err != nil {
-// 		ctx.SetStatus(http.StatusInternalServerError)
-// 		return
-// 	}
+	err := ctx.JsonDecode(&record)
+	if err != nil {
+		ctx.SetStatus(http.StatusBadRequest)
+		return
+	}
 
-// 	ctx.JsonResponse(http.StatusCreated, newRecord)
-// }
+	newRecord, err := ctrl.Repository.Create(record)
+	if err != nil {
+		ctx.SetStatus(http.StatusInternalServerError)
+		return
+	}
 
-// func (ctrl *CRUDController[T]) ReadAll(ctx *Context) {
-// 	records, err := ctrl.Repository.ReadAll()
-// 	if err != nil {
-// 		ctx.SetStatus(http.StatusInternalServerError)
-// 		return
-// 	}
+	ctx.JsonResponse(http.StatusCreated, newRecord)
+}
 
-// 	ctx.JsonResponse(http.StatusOK, records)
-// }
+func (ctrl *CRUDController[T]) ReadAll(ctx *Context) {
+	records, err := ctrl.Repository.ReadAll()
+	if err != nil {
+		ctx.SetStatus(http.StatusInternalServerError)
+		return
+	}
 
-// func (ctrl *CRUDController[T]) Read(ctx *Context) {
-// 	record, err := ctrl.Repository.Read(ctx.GetID())
-// 	if err != nil {
-// 		ctx.JsonResponse(http.StatusNotFound, nil)
-// 		return
-// 	}
+	ctx.JsonResponse(http.StatusOK, records)
+}
 
-// 	ctx.JsonResponse(http.StatusOK, record)
-// }
+func (ctrl *CRUDController[T]) Read(ctx *Context) {
+	record, err := ctrl.Repository.Read(ctx.GetID())
+	if err != nil {
+		ctx.JsonResponse(http.StatusNotFound, nil)
+		return
+	}
 
-// func (ctrl *CRUDController[T]) Update(ctx *Context) {
-// 	var record T
+	ctx.JsonResponse(http.StatusOK, record)
+}
 
-// 	err := ctx.JsonDecode(&record)
-// 	if err != nil {
-// 		ctx.SetStatus(http.StatusBadRequest)
-// 		return
-// 	}
+func (ctrl *CRUDController[T]) Update(ctx *Context) {
+	var record T
 
-// 	updatedRecord, err := ctrl.Repository.Update(ctx.GetID(), record)
-// 	if err != nil {
-// 		ctx.SetStatus(http.StatusInternalServerError)
-// 		return
-// 	}
+	err := ctx.JsonDecode(&record)
+	if err != nil {
+		ctx.SetStatus(http.StatusBadRequest)
+		return
+	}
 
-// 	ctx.JsonResponse(http.StatusOK, updatedRecord)
-// }
+	updatedRecord, err := ctrl.Repository.Update(ctx.GetID(), record)
+	if err != nil {
+		ctx.SetStatus(http.StatusInternalServerError)
+		return
+	}
 
-// func (ctrl *CRUDController[T]) Destroy(ctx *Context) {
-// 	err := ctrl.Repository.Delete(ctx.GetID())
-// 	if err != nil {
-// 		ctx.Response.WriteHeader(http.StatusInternalServerError)
-// 		return
-// 	}
+	ctx.JsonResponse(http.StatusOK, updatedRecord)
+}
 
-// 	ctx.Response.WriteHeader(http.StatusOK)
-// }
+func (ctrl *CRUDController[T]) Destroy(ctx *Context) {
+	err := ctrl.Repository.Delete(ctx.GetID())
+	if err != nil {
+		ctx.Response.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	ctx.Response.WriteHeader(http.StatusOK)
+}
