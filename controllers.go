@@ -1,7 +1,6 @@
 package rest
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -36,7 +35,6 @@ func (ctrl *RestController) Delete(path string, handler HandlerFunc) {
 
 func (ctrl *RestController) createHandler(path string, handler HandlerFunc) *mux.Route {
 	h := func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("RestController.createHandler", r.URL.Path)
 		handler(NewContext(w, r))
 	}
 	return ctrl.Router.SubRouter.HandleFunc(path, h)
