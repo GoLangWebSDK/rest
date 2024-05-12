@@ -93,10 +93,5 @@ func (rest *Rest) mapRoute() {
 
 func (rest *Rest) mapControllerHandlers() {
 	ctrl := NewMappedController(rest)
-
-	rest.controllers = append(rest.controllers, ctrl)
-
-	for _, ctrl := range rest.controllers {
-		ctrl.Map()
-	}
+	ctrl.Map()
 }

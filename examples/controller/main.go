@@ -1,4 +1,4 @@
-package rest
+package main
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 func main() {
 	router := rest.NewRouter()
 
-	apiRouter := router.PathPrefix("/api")
+	apiRouter := router.RoutePrefix("/api")
 
 	apiRouter.Route("/users").Controller(NewUsersController())
 
@@ -18,13 +18,4 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
-}
-
-
-type UsersController struct {
-	rest.Controller
-}
-
-func NewUsersController() *UsersController {
-	return &UsersController{}
 }
