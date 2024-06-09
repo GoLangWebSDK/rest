@@ -4,7 +4,7 @@ import (
 	"net/http"
 )
 
-type Rest struct {
+type Router struct {
 	Mux               *http.ServeMux
 	HTTPHandler       http.Handler
 	CurrentRoute      *Route
@@ -12,77 +12,78 @@ type Rest struct {
 	CurrentHost       string
 	CurrentPathPrefix string
 	CurrentPath       string
-	currentHandler    RestHandler
+	CurrentHandler    RestHandler
 }
 
-func NewRouter() *Rest {
-	return &Rest{
+func NewRouter() *Router {
+	return &Router{
 		Mux: http.NewServeMux(),
 	}
 }
 
-func (rest *Rest) Load(routes Routes) {
+func (router *Router) Load(routes Routes) {
 	if routes != nil {
-		routes.LoadRoutes(rest)
-		routes.LoadMiddlewares(rest)
+		routes.LoadRoutes(router)
+		routes.LoadMiddlewares(router)
 	}
 }
 
-func (rest *Rest) Use(middlewares ...Middleware) *Rest {
-	if rest.HTTPHandler == nil {
-		rest.HTTPHandler = rest.Mux
+func (router *Router) Use(middlewares ...Middleware) *Router {
+	if router.HTTPHandler == nil {
+		router.HTTPHandler = router.Mux
 	}
 
 	for _, mw := range middlewares {
-		rest.HTTPHandler = mw(rest.HTTPHandler)
+		router.HTTPHandler = mw(router.HTTPHandler)
 	}
 
-	return rest
+	return router
 }
 
-func (rest *Rest) Scheme(scheme string) *Rest {
-	rest.CurrentScheme = scheme
-	return rest
+func (router *Router) StrictSlash(value bool) *Router {
+	return router
 }
 
-func (rest *Rest) Host(host string) *Rest {
-	rest.CurrentHost = host
-	return rest
+func (router *Router) Scheme(scheme string) *Router {
+	router.CurrentScheme = scheme
+	return router
 }
 
-func (rest *Rest) RoutePrefix(prefix string) *Rest {
-	rest.CurrentPathPrefix = prefix
-	return rest
+func (router *Router) Host(host string) *Router {
+	router.CurrentHost = host
+	return router
 }
 
-func (rest *Rest) API(version ...string) *Rest {
+func (router *Router) RoutePrefix(prefix string) *Router {
+	router.CurrentPathPrefix = prefix
+	return router
+}
+
+func (router *Router) API(version ...string) *Router {
 	if len(version) != 0 {
-		rest.CurrentPathPrefix = "/api/" + version[0]
-		return rest
+		router.CurrentPathPrefix = "/api/" + version[0]
+		return router
 	}
-	rest.CurrentPathPrefix = "/api"
-	return rest
+	router.CurrentPathPrefix = "/api"
+	return router
 }
 
-// func (rest *Rest) StrictSlash(value bool) *Rest {
-// 	rest.Mux.StrictSlash(value)
-// 	return rest
-// }
-
-func (rest *Rest) Route(route string) *Rest {
-	rest.CurrentPath = route
-	rest.CurrentRoute = NewRoute(rest)
-	return rest
+func (router *Router) Route(path string) *Router {
+	router.CurrentPath = path
+	router.CurrentRoute = NewRoute(router)
+	return router
 }
 
-func (rest *Rest) Controller(ctrl RestHandler) {
-	rest.currentHandler = ctrl
+func (router *Router) Controller(ctrl RestHandler) {
+	router.CurrentHandler = ctrl
+	router.CurrentRoute.SetHandler(ctrl)
+	router.CurrentRoute.Map()
 }
 
-func (rest *Rest) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	if rest.HTTPHandler == nil {
-		rest.HTTPHandler = rest.Mux
+func (router *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	if router.HTTPHandler == nil {
+		router.HTTPHandler = router.Mux
 	}
 
-	rest.HTTPHandler.ServeHTTP(w, req)
+	router.HTTPHandler.ServeHTTP(w, req)
 }

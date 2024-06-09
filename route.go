@@ -7,16 +7,17 @@ import (
 type Route struct {
 	SubRouter  *http.ServeMux
 	Handler    RestHandler
-	Path       string
-	PathPrefix string
 	Host       string
 	Schema     string
+	Path       string
+	PathPrefix string
+	FinalPath  string
 }
 
-func NewRoute(router *Rest) *Route {
+func NewRoute(router *Router) *Route {
 	return &Route{
 		SubRouter:  router.Mux,
-		Handler:    router.currentHandler,
+		Handler:    router.CurrentHandler,
 		Path:       router.CurrentPath,
 		PathPrefix: router.CurrentPathPrefix,
 		Host:       router.CurrentHost,
@@ -45,6 +46,11 @@ func (route *Route) SetHost(host string) *Route {
 }
 
 func (route *Route) Map() {
+	route.FinalPath = route.Path
+
+	if route.PathPrefix != "" {
+		route.FinalPath = route.PathPrefix + route.Path
+	}
 
 	route.Handler.Run()
 
@@ -53,7 +59,7 @@ func (route *Route) Map() {
 		route.Handler.Create(NewSession(r, w))
 	}
 
-	PostPath := "POST " + route.Path
+	PostPath := "POST " + route.FinalPath
 	route.SubRouter.HandleFunc(PostPath, PostHandler)
 
 	// GET
@@ -61,7 +67,7 @@ func (route *Route) Map() {
 		route.Handler.Read(NewSession(r, w))
 	}
 
-	GetPath := "GET " + route.Path + "/{id}"
+	GetPath := "GET " + route.FinalPath + "/{id}"
 	route.SubRouter.HandleFunc(GetPath, GetHandler)
 
 	// GET ALL
@@ -69,7 +75,7 @@ func (route *Route) Map() {
 		route.Handler.ReadAll(NewSession(r, w))
 	}
 
-	GetAllPath := "GET " + route.Path
+	GetAllPath := "GET " + route.FinalPath
 	route.SubRouter.HandleFunc(GetAllPath, GetAllHandler)
 
 	// PUT
@@ -77,7 +83,7 @@ func (route *Route) Map() {
 		route.Handler.Update(NewSession(r, w))
 	}
 
-	PutPath := "PUT " + route.Path + "/{id}"
+	PutPath := "PUT " + route.FinalPath + "/{id}"
 	route.SubRouter.HandleFunc(PutPath, PutHandler)
 
 	// DELETE
@@ -85,7 +91,7 @@ func (route *Route) Map() {
 		route.Handler.Destroy(NewSession(r, w))
 	}
 
-	DeletePath := "DELETE " + route.Path + "/{id}"
+	DeletePath := "DELETE " + route.FinalPath + "/{id}"
 	route.SubRouter.HandleFunc(DeletePath, DeleteHandler)
 }
 

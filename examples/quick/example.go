@@ -11,15 +11,15 @@ func main() {
 
 	ctrl := rest.NewController(router)
 
-	ctrl.Get("/users/{id}", func(ctx *rest.Context) {
+	ctrl.Get("/users/{id}", func(ctx *rest.Session) {
 		fmt.Println("UsersController::Read")
 	})
 
-	ctrl.Post("/save/users", func(ctx *rest.Context) {
+	ctrl.Post("/save/users", func(ctx *rest.Session) {
 		fmt.Println("UsersController::Create")
 	})
 
-	ctrl.Post("/save/users/{id}/post", func(ctx *rest.Context) {
+	ctrl.Post("/save/users/{id}/post", func(ctx *rest.Session) {
 		fmt.Println("UsersController::Update")
 	})
 

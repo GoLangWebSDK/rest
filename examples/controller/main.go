@@ -12,9 +12,9 @@ func main() {
 
 	apiRouter := router.RoutePrefix("/api")
 
-	apiRouter.Route("/users").Controller(NewUsersController())
+	apiRouter.Route("/users").Controller(NewUsersController(router))
 
-	err := http.ListenAndServe(":8080", router.Mux)
+	err := http.ListenAndServe(":8080", router)
 	if err != nil {
 		fmt.Println(err)
 	}

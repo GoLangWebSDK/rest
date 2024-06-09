@@ -3,8 +3,8 @@ package rest
 import "net/http"
 
 type Routes interface {
-	LoadRoutes(router *Rest)
-	LoadMiddlewares(router *Rest)
+	LoadRoutes(router *Router)
+	LoadMiddlewares(router *Router)
 }
 
 type RestHandler interface {
