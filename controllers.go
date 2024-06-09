@@ -2,115 +2,98 @@ package rest
 
 import (
 	"net/http"
-
-	"github.com/gorilla/mux"
 )
 
 // REST CONTROLLER
 type RestController struct {
-	Router *Rest
+	Router *http.ServeMux
 }
 
 func NewController(router *Rest) *RestController {
 	return &RestController{
-		Router: router,
+		Router: router.Mux,
 	}
 }
 
 func (ctrl *RestController) Get(path string, handler HandlerFunc) {
-	ctrl.createHandler(path, handler).Methods("GET")
+	GetPath := "GET " + path
+	ctrl.createHandler(GetPath, handler)
 }
 
-func (ctrl *RestController) Post(path string, handler HandlerFunc) {
-	ctrl.createHandler(path, handler).Methods("POST")
+func (ctrl *RestController) Post(path string, handler func(session *Session)) {
+	PostPath := "POST " + path
+
+	ctrl.createHandler(PostPath, handler)
 }
 
-func (ctrl *RestController) Put(path string, handler HandlerFunc) {
-	ctrl.createHandler(path, handler).Methods("PUT")
+func (ctrl *RestController) Put(path string, handler func(session *Session)) {
+	PutPath := "PUT " + path
+	ctrl.createHandler(PutPath, handler)
 }
 
-func (ctrl *RestController) Delete(path string, handler HandlerFunc) {
-	ctrl.createHandler(path, handler).Methods("DELETE")
+func (ctrl *RestController) Delete(path string, handler func(session *Session)) {
+	DeletePath := "DELETE " + path
+	ctrl.createHandler(DeletePath, handler)
 }
 
-func (ctrl *RestController) createHandler(path string, handler HandlerFunc) *mux.Route {
+func (ctrl *RestController) createHandler(path string, handler func(session *Session)) {
 	h := func(w http.ResponseWriter, r *http.Request) {
-		handler(NewContext(w, r))
+		handler(NewSession(r, w))
 	}
-	return ctrl.Router.SubRouter.HandleFunc(path, h)
-}
 
-// MAPPED CONTROLLER
-type MappedController struct {
-	Router    *Rest
-	SubRouter *mux.Router
-	Route     string
-	Handler   RestHandler
-}
-
-func NewMappedController(router *Rest) MappedController {
-	return MappedController{
-		Router:    router,
-		SubRouter: router.SubRouter,
-		Route:     router.currentRoute,
-		Handler:   router.currentHandler,
-	}
-}
-
-func (ctrl *MappedController) Map() {
-	ctrl.Handler.SetRouter(ctrl.Router)
-	ctrl.Handler.Run()
-
-	// GET
-	GetHandler := func(w http.ResponseWriter, r *http.Request) {
-		ctrl.Handler.Read(NewContext(w, r))
-	}
-	ctrl.SubRouter.HandleFunc("/{id}", GetHandler).Methods("GET")
-
-	// GET ALL
-	GetAllHandler := func(w http.ResponseWriter, r *http.Request) {
-		ctrl.Handler.ReadAll(NewContext(w, r))
-	}
-	ctrl.SubRouter.HandleFunc("", GetAllHandler).Methods("GET")
-
-	// POST
-	PostHandler := func(w http.ResponseWriter, r *http.Request) {
-		ctrl.Handler.Create(NewContext(w, r))
-	}
-	ctrl.SubRouter.HandleFunc("", PostHandler).Methods("POST")
-
-	// PUT
-	PutHandler := func(w http.ResponseWriter, r *http.Request) {
-		ctrl.Handler.Update(NewContext(w, r))
-	}
-	ctrl.SubRouter.HandleFunc("/{id}", PutHandler).Methods("PUT")
-
-	// DELETE
-	DeleteHandler := func(w http.ResponseWriter, r *http.Request) {
-		ctrl.Handler.Destroy(NewContext(w, r))
-	}
-	ctrl.SubRouter.HandleFunc("/{id}", DeleteHandler).Methods("DELETE")
+	ctrl.Router.HandleFunc(path, h)
 }
 
 // (BASE) CONTROLLER
 type Controller struct {
-	RestController
+	Router *Rest
 }
 
 var _ RestHandler = &Controller{}
 
-func (ctrl *Controller) SetRouter(router *Rest) {
-	ctrl.RestController.Router = router
+func New(router *Rest) *Controller {
+	return &Controller{
+		Router: router,
+	}
+}
+
+func (ctrl *Controller) Get(path string, handler HandlerFunc) {
+	GetPath := "GET " + ctrl.Router.CurrentRoute.Path + path
+	ctrl.createHandler(GetPath, handler)
+}
+
+func (ctrl *Controller) Post(path string, handler func(session *Session)) {
+	PostPath := "POST " + ctrl.Router.CurrentRoute.Path + path
+
+	ctrl.createHandler(PostPath, handler)
+}
+
+func (ctrl *Controller) Put(path string, handler func(session *Session)) {
+	PutPath := "PUT " + ctrl.Router.CurrentRoute.Path + path
+	ctrl.createHandler(PutPath, handler)
+}
+
+func (ctrl *Controller) Delete(path string, handler func(session *Session)) {
+	DeletePath := "DELETE " + ctrl.Router.CurrentRoute.Path + path
+	ctrl.createHandler(DeletePath, handler)
+}
+
+func (ctrl *Controller) createHandler(path string, handler func(session *Session)) {
+	h := func(w http.ResponseWriter, r *http.Request) {
+		handler(NewSession(r, w))
+	}
+
+	ctrl.Router.CurrentRoute.SubRouter.HandleFunc(path, h)
 }
 
 func (ctrl *Controller) Run() {}
 
-func (ctrl *Controller) Create(ctx *Context) {}
+func (ctrl *Controller) Create(session *Session) {}
 
-func (ctrl *Controller) Read(ctx *Context) {}
+func (ctrl *Controller) Read(session *Session) {}
 
-func (ctrl *Controller) ReadAll(ctx *Context) {}
+func (ctrl *Controller) ReadAll(session *Session) {}
 
-func (ctrl *Controller) Update(ctx *Context) {}
+func (ctrl *Controller) Update(session *Session) {}
 
-func (ctrl *Controller) Destroy(ctx *Context) {}
+func (ctrl *Controller) Destroy(session *Session) {}

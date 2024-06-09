@@ -1,26 +1,23 @@
 package rest
 
 import (
-	"github.com/gorilla/mux"
+	"net/http"
 )
 
 type Rest struct {
-	Mux                *mux.Router
-	SubRouter          *mux.Router
-	controllers        []MappedController
-	currentScheme      string
-	currentHost        string
-	currentRoutePrefix string
-	currentRoute       string
-	currentHandler     RestHandler
+	Mux               *http.ServeMux
+	HTTPHandler       http.Handler
+	CurrentRoute      *Route
+	CurrentScheme     string
+	CurrentHost       string
+	CurrentPathPrefix string
+	CurrentPath       string
+	currentHandler    RestHandler
 }
 
 func NewRouter() *Rest {
-	m := mux.NewRouter()
 	return &Rest{
-		Mux:         m,
-		SubRouter:   m,
-		controllers: []MappedController{},
+		Mux: http.NewServeMux(),
 	}
 }
 
@@ -31,67 +28,61 @@ func (rest *Rest) Load(routes Routes) {
 	}
 }
 
-func (rest *Rest) Schemes(scheme string) *Rest {
-	rest.currentScheme = scheme
+func (rest *Rest) Use(middlewares ...Middleware) *Rest {
+	if rest.HTTPHandler == nil {
+		rest.HTTPHandler = rest.Mux
+	}
+
+	for _, mw := range middlewares {
+		rest.HTTPHandler = mw(rest.HTTPHandler)
+	}
+
+	return rest
+}
+
+func (rest *Rest) Scheme(scheme string) *Rest {
+	rest.CurrentScheme = scheme
 	return rest
 }
 
 func (rest *Rest) Host(host string) *Rest {
-	rest.currentHost = host
+	rest.CurrentHost = host
 	return rest
 }
 
 func (rest *Rest) RoutePrefix(prefix string) *Rest {
-	rest.currentRoutePrefix = prefix
+	rest.CurrentPathPrefix = prefix
 	return rest
 }
 
 func (rest *Rest) API(version ...string) *Rest {
 	if len(version) != 0 {
-		rest.currentRoutePrefix = "/api/" + version[0]
+		rest.CurrentPathPrefix = "/api/" + version[0]
 		return rest
 	}
-	rest.currentRoutePrefix = "/api"
+	rest.CurrentPathPrefix = "/api"
 	return rest
 }
 
-func (rest *Rest) StrictSlash(value bool) *Rest {
-	rest.Mux.StrictSlash(value)
-	return rest
-}
+// func (rest *Rest) StrictSlash(value bool) *Rest {
+// 	rest.Mux.StrictSlash(value)
+// 	return rest
+// }
 
 func (rest *Rest) Route(route string) *Rest {
-	rest.currentRoute = route
+	rest.CurrentPath = route
+	rest.CurrentRoute = NewRoute(rest)
 	return rest
 }
 
 func (rest *Rest) Controller(ctrl RestHandler) {
 	rest.currentHandler = ctrl
-	rest.mapRoute()
-	rest.mapControllerHandlers()
 }
 
-func (rest *Rest) mapRoute() {
-	pathPrefix := rest.currentRoute
-
-	if rest.currentRoutePrefix != "" {
-		pathPrefix = rest.currentRoutePrefix + rest.currentRoute
+func (rest *Rest) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	if rest.HTTPHandler == nil {
+		rest.HTTPHandler = rest.Mux
 	}
 
-	route := rest.Mux.PathPrefix(pathPrefix)
-
-	if rest.currentScheme != "" {
-		route = route.Schemes(rest.currentScheme)
-	}
-
-	if rest.currentHost != "" {
-		route = route.Host(rest.currentHost)
-	}
-
-	rest.SubRouter = route.Subrouter()
-}
-
-func (rest *Rest) mapControllerHandlers() {
-	ctrl := NewMappedController(rest)
-	ctrl.Map()
+	rest.HTTPHandler.ServeHTTP(w, req)
 }

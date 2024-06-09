@@ -1,5 +1,7 @@
 package rest
 
+import "net/http"
+
 type Routes interface {
 	LoadRoutes(router *Rest)
 	LoadMiddlewares(router *Rest)
@@ -7,13 +9,13 @@ type Routes interface {
 
 type RestHandler interface {
 	Run()
-	SetRouter(router *Rest)
-	Create(ctx *Context)
-	Read(ctx *Context)
-	ReadAll(ctx *Context)
-	Update(ctx *Context)
-	Destroy(ctx *Context)
+	Create(session *Session)
+	Read(session *Session)
+	ReadAll(session *Session)
+	Update(session *Session)
+	Destroy(session *Session)
 }
 
-type HandlerFunc func(ctx *Context)
+type HandlerFunc func(session *Session)
 
+type Middleware func(handler http.Handler) http.Handler

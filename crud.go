@@ -17,68 +17,69 @@ func NewCRUDController[T any](repo crud.Repository[T]) *CRUDController[T] {
 	}
 }
 
-func (ctrl *CRUDController[T]) Create(ctx *Context) {
+func (ctrl *CRUDController[T]) Create(session *Session) {
 	var record T
 
-	err := ctx.JsonDecode(&record)
+	err := session.JsonDecode(&record)
 	if err != nil {
-		ctx.SetStatus(http.StatusBadRequest)
+		session.SetStatus(http.StatusBadRequest)
 		return
 	}
 
 	newRecord, err := ctrl.Repository.Create(record)
 	if err != nil {
-		ctx.SetStatus(http.StatusInternalServerError)
+		session.SetStatus(http.StatusInternalServerError)
 		return
 	}
 
-	ctx.JsonResponse(http.StatusCreated, newRecord)
+	session.JsonResponse(http.StatusCreated, newRecord)
 }
 
-func (ctrl *CRUDController[T]) ReadAll(ctx *Context) {
+func (ctrl *CRUDController[T]) ReadAll(session *Session) {
 	records, err := ctrl.Repository.ReadAll()
 	if err != nil {
-		ctx.SetStatus(http.StatusInternalServerError)
+		session.SetStatus(http.StatusInternalServerError)
 		return
 	}
 
-	ctx.JsonResponse(http.StatusOK, records)
+	session.JsonResponse(http.StatusOK, records)
 }
 
-func (ctrl *CRUDController[T]) Read(ctx *Context) {
-	record, err := ctrl.Repository.Read(ctx.GetID())
+func (ctrl *CRUDController[T]) Read(session *Session) {
+	record, err := ctrl.Repository.Read(session.GetID())
 	if err != nil {
-		ctx.JsonResponse(http.StatusNotFound, nil)
+		session.JsonResponse(http.StatusNotFound, nil)
 		return
 	}
 
-	ctx.JsonResponse(http.StatusOK, record)
+	session.JsonResponse(http.StatusOK, record)
 }
 
-func (ctrl *CRUDController[T]) Update(ctx *Context) {
+func (ctrl *CRUDController[T]) Update(session *Session) {
 	var record T
 
-	err := ctx.JsonDecode(&record)
+	err := session.JsonDecode(&record)
 	if err != nil {
-		ctx.SetStatus(http.StatusBadRequest)
+		session.SetStatus(http.StatusBadRequest)
 		return
 	}
 
-	updatedRecord, err := ctrl.Repository.Update(ctx.GetID(), record)
+	updatedRecord, err := ctrl.Repository.Update(session.GetID(), record)
 	if err != nil {
-		ctx.SetStatus(http.StatusInternalServerError)
+		session.SetStatus(http.StatusInternalServerError)
 		return
 	}
 
-	ctx.JsonResponse(http.StatusOK, updatedRecord)
+	session.JsonResponse(http.StatusOK, updatedRecord)
 }
 
-func (ctrl *CRUDController[T]) Destroy(ctx *Context) {
-	err := ctrl.Repository.Delete(ctx.GetID())
+func (ctrl *CRUDController[T]) Destroy(session *Session) {
+	err := ctrl.Repository.Delete(session.GetID())
 	if err != nil {
-		ctx.Response.WriteHeader(http.StatusInternalServerError)
+		session.Response.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	ctx.Response.WriteHeader(http.StatusOK)
+	session.Response.WriteHeader(http.StatusOK)
 }
+
