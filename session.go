@@ -24,6 +24,14 @@ func (session *Session) GetParam(key string) string {
 	return session.Request.PathValue(key)
 }
 
+func (session *Session) GetUUID() string {
+	return session.GetParam("uuid")
+}
+
+func (session *Session) GetSlug() string {
+	return session.GetParam("slug")
+}
+
 func (session *Session) GetID(key ...string) uint {
 	paramKey := "id"
 	if key != nil {
@@ -39,17 +47,17 @@ func (session *Session) GetID(key ...string) uint {
 	return uint(u64)
 }
 
+func (session *Session) JsonDecode(value interface{}) error {
+	session.JsonDecoder = json.NewDecoder(session.Request.Body)
+	return session.JsonDecoder.Decode(value)
+}
+
 func (session *Session) SetHeader(key, value string) {
 	session.Response.Header().Set(key, value)
 }
 
 func (session *Session) SetStatus(status int) {
 	session.Response.WriteHeader(status)
-}
-
-func (session *Session) JsonDecode(value interface{}) error {
-	session.JsonDecoder = json.NewDecoder(session.Request.Body)
-	return session.JsonDecoder.Decode(value)
 }
 
 func (session *Session) JsonResponse(status int, data interface{}) {

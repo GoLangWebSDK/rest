@@ -1,5 +1,7 @@
 package rest
 
+// Todo
+// - Add strictslash support
 import (
 	"net/http"
 )
@@ -8,8 +10,6 @@ type Router struct {
 	Mux               *http.ServeMux
 	HTTPHandler       http.Handler
 	CurrentRoute      *Route
-	CurrentScheme     string
-	CurrentHost       string
 	CurrentPathPrefix string
 	CurrentPath       string
 	CurrentHandler    RestHandler
@@ -41,16 +41,6 @@ func (router *Router) Use(middlewares ...Middleware) *Router {
 }
 
 func (router *Router) StrictSlash(value bool) *Router {
-	return router
-}
-
-func (router *Router) Scheme(scheme string) *Router {
-	router.CurrentScheme = scheme
-	return router
-}
-
-func (router *Router) Host(host string) *Router {
-	router.CurrentHost = host
 	return router
 }
 

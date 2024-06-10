@@ -9,8 +9,8 @@ type RestController struct {
 	Router *http.ServeMux
 }
 
-func NewController(router *Router) *RestController {
-	return &RestController{
+func NewController(router *Router) RestController {
+	return RestController{
 		Router: router.Mux,
 	}
 }
@@ -22,7 +22,6 @@ func (ctrl *RestController) Get(path string, handler HandlerFunc) {
 
 func (ctrl *RestController) Post(path string, handler func(session *Session)) {
 	PostPath := "POST " + path
-
 	ctrl.createHandler(PostPath, handler)
 }
 

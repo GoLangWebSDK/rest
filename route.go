@@ -20,8 +20,6 @@ func NewRoute(router *Router) *Route {
 		Handler:    router.CurrentHandler,
 		Path:       router.CurrentPath,
 		PathPrefix: router.CurrentPathPrefix,
-		Host:       router.CurrentHost,
-		Schema:     router.CurrentScheme,
 	}
 }
 
@@ -32,16 +30,6 @@ func (route *Route) SetPath(path string) *Route {
 
 func (route *Route) SetHandler(ctrl RestHandler) *Route {
 	route.Handler = ctrl
-	return route
-}
-
-func (route *Route) SetSchema(schema string) *Route {
-	route.Schema = schema
-	return route
-}
-
-func (route *Route) SetHost(host string) *Route {
-	route.Host = host
 	return route
 }
 
@@ -94,28 +82,3 @@ func (route *Route) Map() {
 	DeletePath := "DELETE " + route.FinalPath + "/{id}"
 	route.SubRouter.HandleFunc(DeletePath, DeleteHandler)
 }
-
-// func (rest *Rest) mapRoute() {
-// 	pathPrefix := rest.currentRoute
-//
-// 	if rest.currentRoutePrefix != "" {
-// 		pathPrefix = rest.currentRoutePrefix + rest.currentRoute
-// 	}
-//
-// 	route := rest.Mux.PathPrefix(pathPrefix)
-//
-// 	if rest.currentScheme != "" {
-// 		route = route.Schemes(rest.currentScheme)
-// 	}
-//
-// 	if rest.currentHost != "" {
-// 		route = route.Host(rest.currentHost)
-// 	}
-//
-// 	rest.SubRouter = route.Subrouter()
-// }
-//
-// func (rest *Rest) mapControllerHandlers() {
-// 	ctrl := NewMappedController(rest)
-// 	ctrl.Map()
-// }
