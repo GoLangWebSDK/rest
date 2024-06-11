@@ -45,6 +45,15 @@ func (router *Router) RoutePrefix(prefix string) *Router {
 	return router
 }
 
+func (router *Router) API(version ...string) *Router {
+	if len(version) != 0 {
+		router.CurrentPathPrefix = "/api/" + version[0]
+		return router
+	}
+	router.CurrentPathPrefix = "/api"
+	return router
+}
+
 func (router *Router) Route(path string) *Router {
 	router.CurrentPath = path
 	router.CurrentRoute = NewRoute(router)

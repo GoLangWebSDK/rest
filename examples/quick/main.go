@@ -36,13 +36,18 @@ func main() {
 
 	ctrl.Post("/users/create", func(session *rest.Session) {
 		fmt.Println("UsersController::Create")
-		var input struct {
+		var requestBody struct {
 			Username string `json:"username"`
 			Password string `json:"password"`
 		}
 
-		err := session.JsonDecode(&input)
+		err := session.JsonDecode(&requestBody)
 		if err != nil {
+			session.SetStatus(http.StatusBadRequest)
+			return
+		}
+
+		if requestBody.Password == "" || requestBody.Username == "" {
 			session.SetStatus(http.StatusBadRequest)
 			return
 		}
@@ -53,7 +58,7 @@ func main() {
 		}
 
 		responseJson.Status = true
-		responseJson.Msg = fmt.Sprintf("User %s created", input.Username)
+		responseJson.Msg = fmt.Sprintf("User %s created", requestBody.Username)
 
 		session.JsonResponse(http.StatusOK, responseJson)
 	})
@@ -71,6 +76,11 @@ func main() {
 
 		err := session.JsonDecode(&requestBody)
 		if err != nil {
+			session.SetStatus(http.StatusBadRequest)
+			return
+		}
+
+		if requestBody.Content == "" || requestBody.Title == "" {
 			session.SetStatus(http.StatusBadRequest)
 			return
 		}

@@ -10,7 +10,9 @@ import (
 	"time"
 )
 
-var server *http.Server
+const (
+	DefaultServerURL = "http://localhost:8080"
+)
 
 func TestMain(m *testing.M) {
 	// Setup: start the server
@@ -26,8 +28,8 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func TestGetUserRoute(t *testing.T) {
-	resp, err := http.Get("http://localhost:8080/users/1")
+func TestGetRequest(t *testing.T) {
+	resp, err := http.Get(DefaultServerURL + "/users/1")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -45,13 +47,15 @@ func TestGetUserRoute(t *testing.T) {
 	}
 }
 
-func TestPostUserRoute(t *testing.T) {
-	user := map[string]string{
+func TestPostRequest(t *testing.T) {
+	// Test successful request
+	userData := map[string]string{
 		"username": "testuser",
-		"password": "testpassword",
+		"password": "testpass",
 	}
-	bytesRepresentation, _ := json.Marshal(user)
-	resp, err := http.Post("http://localhost:8080/users/create", "application/json", bytes.NewBuffer(bytesRepresentation))
+	jsonData, _ := json.Marshal(userData)
+
+	resp, err := http.Post(DefaultServerURL+"/users/create", "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -67,15 +71,33 @@ func TestPostUserRoute(t *testing.T) {
 		t.Errorf("handler returned unexpected body: got %v want %v",
 			string(body), expected)
 	}
+
+	// Test unsuccessful request (missing password)
+	userData = map[string]string{
+		"username": "testuser",
+	}
+	jsonData, _ = json.Marshal(userData)
+
+	resp, err = http.Post(DefaultServerURL+"/users/create", "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+	if status := resp.StatusCode; status != http.StatusBadRequest {
+		t.Errorf("handler returned wrong status code: got %v want %v",
+			status, http.StatusBadRequest)
+	}
 }
 
-func TestPutUserRoute(t *testing.T) {
+func TestPutRequest(t *testing.T) {
+	// Test successful request
 	post := map[string]string{
 		"title":   "testtitle",
 		"content": "testcontent",
 	}
 	bytesRepresentation, _ := json.Marshal(post)
-	req, _ := http.NewRequest(http.MethodPut, "http://localhost:8080/users/1/post/1/update", bytes.NewBuffer(bytesRepresentation))
+	req, _ := http.NewRequest(http.MethodPut, DefaultServerURL+"/users/1/post/1/update", bytes.NewBuffer(bytesRepresentation))
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -93,10 +115,27 @@ func TestPutUserRoute(t *testing.T) {
 		t.Errorf("handler returned unexpected body: got %v want %v",
 			string(body), expected)
 	}
+
+	// Test unsuccessful request (missing content)
+	post = map[string]string{
+		"title": "testtitle",
+	}
+	bytesRepresentation, _ = json.Marshal(post)
+	req, _ = http.NewRequest(http.MethodPut, DefaultServerURL+"/users/1/post/1/update", bytes.NewBuffer(bytesRepresentation))
+	resp, err = client.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+	if status := resp.StatusCode; status != http.StatusBadRequest {
+		t.Errorf("handler returned wrong status code: got %v want %v",
+			status, http.StatusBadRequest)
+	}
 }
 
-func TestDeleteUserRoute(t *testing.T) {
-	req, err := http.NewRequest("DELETE", "http://localhost:8080/users/1", nil)
+func TestDeleteRequest(t *testing.T) {
+	req, err := http.NewRequest("DELETE", DefaultServerURL+"/users/1", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
