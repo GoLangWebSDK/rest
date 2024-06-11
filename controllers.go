@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"fmt"
 	"net/http"
 )
 
@@ -10,12 +11,14 @@ type RestController struct {
 }
 
 func NewController(router *Router) RestController {
+	fmt.Println("NewController")
 	return RestController{
 		Router: router.Mux,
 	}
 }
 
 func (ctrl *RestController) Get(path string, handler HandlerFunc) {
+	fmt.Println("Mapped to GET " + path)
 	GetPath := "GET " + path
 	ctrl.createHandler(GetPath, handler)
 }
