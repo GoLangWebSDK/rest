@@ -36,7 +36,7 @@ func TestCreatePost(t *testing.T) {
 	}
 	jsonData, _ := json.Marshal(postData)
 
-	resp, err := http.Post(DefaultServerURL+"/posts", "application/json", bytes.NewBuffer(jsonData))
+	resp, err := http.Post(DefaultServerURL+"/posts/", "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -50,8 +50,7 @@ func TestCreatePost(t *testing.T) {
 
 	expected := `{"status":true,"msg":"Created post testpost"}`
 	if string(body) != expected {
-		t.Errorf("handler returned unexpected body: got %v want %v",
-			string(body), expected)
+		t.Errorf("handler returned unexpected body: got %v want %v", string(body), expected)
 	}
 
 	// Test unsuccessful request (missing content)
@@ -60,7 +59,7 @@ func TestCreatePost(t *testing.T) {
 	}
 	jsonData, _ = json.Marshal(postData)
 
-	resp, err = http.Post(DefaultServerURL+"/posts", "application/json", bytes.NewBuffer(jsonData))
+	resp, err = http.Post(DefaultServerURL+"/posts/", "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
 		t.Fatal(err)
 	}

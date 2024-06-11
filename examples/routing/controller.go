@@ -19,7 +19,8 @@ func NewPostsController(router *rest.Router) *PostsController {
 
 func (ctrl *PostsController) Run() {
 
-	ctrl.Post("/posts", func(session *rest.Session) {
+	ctrl.Post("/", func(session *rest.Session) {
+		fmt.Println("Creating Post...")
 		var requestBody struct {
 			Title   string `json:"title"`
 			Content string `json:"content"`
@@ -46,7 +47,7 @@ func (ctrl *PostsController) Run() {
 		session.JsonResponse(http.StatusOK, jsonResponse)
 	})
 
-	ctrl.Get("/posts/{slug}", func(session *rest.Session) {
+	ctrl.Get("/{slug}", func(session *rest.Session) {
 
 		postSlug := session.GetID()
 
@@ -61,7 +62,7 @@ func (ctrl *PostsController) Run() {
 		session.JsonResponse(http.StatusOK, jsonResponse)
 	})
 
-	ctrl.Get("/posts/filter/{key}/{value}", func(session *rest.Session) {
+	ctrl.Get("/filter/{key}/{value}", func(session *rest.Session) {
 
 		key := session.GetParam("key")
 		value := session.GetParam("value")
@@ -77,7 +78,7 @@ func (ctrl *PostsController) Run() {
 		session.JsonResponse(http.StatusOK, jsonResponse)
 	})
 
-	ctrl.Put("/posts/{slug}", func(session *rest.Session) {
+	ctrl.Put("/{slug}", func(session *rest.Session) {
 		postSlug := session.GetSlug()
 
 		var requestBody struct {
@@ -107,7 +108,7 @@ func (ctrl *PostsController) Run() {
 		session.JsonResponse(http.StatusOK, jsonResponse)
 	})
 
-	ctrl.Delete("/posts/{slug}", func(session *rest.Session) {
+	ctrl.Delete("/{slug}", func(session *rest.Session) {
 
 		postSlug := session.GetSlug()
 

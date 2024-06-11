@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/GoLangWebSDK/rest"
 )
 
@@ -19,6 +21,9 @@ func (routes *Routes) LoadRoutes(router *rest.Router) {
 	apiRouter := router.API()
 
 	apiRouter.Route("/posts").Controller(NewPostsController(router))
+
+	fmt.Println("Current route final path: ", apiRouter.CurrentRoute.FinalPath)
+
 }
 
 func (routes *Routes) LoadMiddleware(router *rest.Router) {
