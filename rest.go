@@ -1,7 +1,8 @@
 package rest
 
-// Todo
-// - Add strictslash support
+//ToDo
+// - add strict slash support
+
 import (
 	"net/http"
 )
@@ -10,8 +11,8 @@ type Router struct {
 	Mux               *http.ServeMux
 	HTTPHandler       http.Handler
 	CurrentRoute      *Route
-	CurrentPathPrefix string
 	CurrentPath       string
+	CurrentPathPrefix string
 	CurrentHandler    RestHandler
 }
 
@@ -21,11 +22,10 @@ func NewRouter() *Router {
 	}
 }
 
-func (router *Router) Load(routes Routes) {
-	if routes != nil {
-		routes.LoadRoutes(router)
-		routes.LoadMiddlewares(router)
-	}
+func (router *Router) Load(routes Routes) *Router {
+	routes.LoadRoutes(router)
+	routes.LoadMiddleware(router)
+	return router
 }
 
 func (router *Router) Use(middlewares ...Middleware) *Router {
@@ -40,21 +40,8 @@ func (router *Router) Use(middlewares ...Middleware) *Router {
 	return router
 }
 
-func (router *Router) StrictSlash(value bool) *Router {
-	return router
-}
-
 func (router *Router) RoutePrefix(prefix string) *Router {
 	router.CurrentPathPrefix = prefix
-	return router
-}
-
-func (router *Router) API(version ...string) *Router {
-	if len(version) != 0 {
-		router.CurrentPathPrefix = "/api/" + version[0]
-		return router
-	}
-	router.CurrentPathPrefix = "/api"
 	return router
 }
 
@@ -65,8 +52,9 @@ func (router *Router) Route(path string) *Router {
 }
 
 func (router *Router) Controller(ctrl RestHandler) {
-	router.CurrentHandler = ctrl
 	router.CurrentRoute.SetHandler(ctrl)
+	router.CurrentHandler = ctrl
+
 	router.CurrentRoute.Map()
 }
 

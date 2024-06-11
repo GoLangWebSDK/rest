@@ -27,7 +27,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestGetUserRoute(t *testing.T) {
-	resp, err := http.Get("http://localhost:8099/users/1")
+	resp, err := http.Get("http://localhost:8080/users/1")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -51,7 +51,7 @@ func TestPostUserRoute(t *testing.T) {
 		"password": "testpassword",
 	}
 	bytesRepresentation, _ := json.Marshal(user)
-	resp, err := http.Post("http://localhost:8099/users/create", "application/json", bytes.NewBuffer(bytesRepresentation))
+	resp, err := http.Post("http://localhost:8080/users/create", "application/json", bytes.NewBuffer(bytesRepresentation))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -75,7 +75,7 @@ func TestPutUserRoute(t *testing.T) {
 		"content": "testcontent",
 	}
 	bytesRepresentation, _ := json.Marshal(post)
-	req, _ := http.NewRequest(http.MethodPut, "http://localhost:8099/users/1/post/1/update", bytes.NewBuffer(bytesRepresentation))
+	req, _ := http.NewRequest(http.MethodPut, "http://localhost:8080/users/1/post/1/update", bytes.NewBuffer(bytesRepresentation))
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -96,7 +96,7 @@ func TestPutUserRoute(t *testing.T) {
 }
 
 func TestDeleteUserRoute(t *testing.T) {
-	req, err := http.NewRequest("DELETE", "http://localhost:8099/users/1", nil)
+	req, err := http.NewRequest("DELETE", "http://localhost:8080/users/1", nil)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -82,4 +82,3 @@ func (ctrl *CRUDController[T]) Destroy(session *Session) {
 
 	session.Response.WriteHeader(http.StatusOK)
 }
-
