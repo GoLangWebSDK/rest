@@ -14,20 +14,21 @@ func Logger(next http.Handler) http.Handler {
 
 func Auth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("Running Authorization...")
+		fmt.Print("Running Authorization...")
 
 		secureRoutes := []string{
-			"/api/users",
+			"/api/posts/admin",
 		}
 
 		for _, route := range secureRoutes {
 			if r.URL.Path == route {
-				fmt.Println("User is authorized")
+				fmt.Println("User is authorized.")
 				next.ServeHTTP(w, r)
 				return
 			}
 		}
 
+		fmt.Println("Path is public.")
 		next.ServeHTTP(w, r)
 	})
 }

@@ -36,7 +36,7 @@ func TestCreatePost(t *testing.T) {
 	}
 	jsonData, _ := json.Marshal(postData)
 
-	resp, err := http.Post(DefaultServerURL+"/posts/", "application/json", bytes.NewBuffer(jsonData))
+	resp, err := http.Post(DefaultServerURL+"/posts/create", "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -59,7 +59,7 @@ func TestCreatePost(t *testing.T) {
 	}
 	jsonData, _ = json.Marshal(postData)
 
-	resp, err = http.Post(DefaultServerURL+"/posts/", "application/json", bytes.NewBuffer(jsonData))
+	resp, err = http.Post(DefaultServerURL+"/posts/create", "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -78,7 +78,7 @@ func TestCreatePost(t *testing.T) {
 }
 
 func TestGetPostBySlug(t *testing.T) {
-	resp, err := http.Get(DefaultServerURL + "/posts/testpost")
+	resp, err := http.Get(DefaultServerURL + "/posts/slug/testpost")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -108,7 +108,7 @@ func TestGetPostByFilter(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expected := `{"status":true,"msg":"Post with title testpost"}`
+	expected := `{"status":true,"msg":"Post filtered by title with value testpost"}`
 	if string(body) != expected {
 		t.Errorf("handler returned unexpected body: got %v want %v",
 			string(body), expected)
@@ -123,16 +123,20 @@ func TestUpdatePost(t *testing.T) {
 	}
 	jsonData, _ := json.Marshal(postData)
 
-	req, _ := http.NewRequest("PUT", DefaultServerURL+"/posts/testpost", bytes.NewBuffer(jsonData))
-	resp, _ := http.DefaultClient.Do(req)
-	resp.Body.Close()
+	req, _ := http.NewRequest("PUT", DefaultServerURL+"/posts/update/testpost", bytes.NewBuffer(jsonData))
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	expected := `{"status":true,"msg":"Updated post testpost, new content: testcontent"}`
+	expected := `{"status":true,"msg":"Updated post testpost, with content: testcontent"}`
 	if string(body) != expected {
 		t.Errorf("handler returned unexpected body: got %v want %v",
 			string(body), expected)
@@ -144,9 +148,13 @@ func TestUpdatePost(t *testing.T) {
 	}
 	jsonData, _ = json.Marshal(postData)
 
-	req, _ = http.NewRequest("PUT", DefaultServerURL+"/posts/testpost", bytes.NewBuffer(jsonData))
-	resp, _ = http.DefaultClient.Do(req)
-	resp.Body.Close()
+	req, _ = http.NewRequest("PUT", DefaultServerURL+"/posts/update/testpost", bytes.NewBuffer(jsonData))
+	resp, err = http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer resp.Body.Close()
 
 	body, err = io.ReadAll(resp.Body)
 	if err != nil {
@@ -160,9 +168,13 @@ func TestUpdatePost(t *testing.T) {
 }
 
 func TestDeletePost(t *testing.T) {
-	req, _ := http.NewRequest("DELETE", DefaultServerURL+"/posts/testpost", nil)
-	resp, _ := http.DefaultClient.Do(req)
-	resp.Body.Close()
+	req, _ := http.NewRequest("DELETE", DefaultServerURL+"/posts/remove/testpost", nil)
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -171,8 +183,6 @@ func TestDeletePost(t *testing.T) {
 
 	expected := `{"status":true,"msg":"Deleted post testpost"}`
 	if string(body) != expected {
-		t.Errorf("handler returned unexpected body: got %v want %v",
-			string(body), expected)
+		t.Errorf("handler returned unexpected body: got %v want %v", string(body), expected)
 	}
-
 }
