@@ -69,7 +69,6 @@ func (router *Router) Route(path string) *Router {
 func (router *Router) Controller(ctrl RestHandler) {
 	router.CurrentRoute.SetHandler(ctrl)
 	router.CurrentHandler = ctrl
-
 	router.CurrentRoute.Map()
 }
 
@@ -78,5 +77,39 @@ func (router *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		router.HTTPHandler = router.Mux
 	}
 
+	if router.TrimSlash {
+		router.HTTPHandler = StripSlash(router.HTTPHandler)
+	}
+
 	router.HTTPHandler.ServeHTTP(w, req)
+}
+
+func StripSlash(next http.Handler) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		path := r.URL.Path
+
+		if len(path) > 1 && path[len(path)-1] == '/' {
+			r.URL.Path = path[:len(path)-1]
+		}
+
+		next.ServeHTTP(w, r)
+	}
+
+	return http.HandlerFunc(fn)
+}
+
+func RedirectSlash(next http.Handler) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		path := r.URL.Path
+
+		if len(path) > 1 && path[len(path)-1] == '/' {
+			r.URL.Path = path[:len(path)-1]
+			http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	}
+
+	return http.HandlerFunc(fn)
 }

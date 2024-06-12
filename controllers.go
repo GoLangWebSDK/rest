@@ -19,7 +19,7 @@ func NewController(router *Router) RestController {
 func (ctrl *RestController) Get(path string, handler HandlerFunc) {
 	GetPath := "GET " + path
 
-	if ctrl.Router.TrimSlash {
+	if ctrl.Router.TrimSlash && path != "/" {
 		GetPath = strings.TrimSuffix(GetPath, "/")
 	}
 
@@ -29,7 +29,7 @@ func (ctrl *RestController) Get(path string, handler HandlerFunc) {
 func (ctrl *RestController) Post(path string, handler func(session *Session)) {
 	PostPath := "POST " + path
 
-	if ctrl.Router.TrimSlash {
+	if ctrl.Router.TrimSlash && path != "/" {
 		PostPath = strings.TrimSuffix(PostPath, "/")
 	}
 
@@ -39,7 +39,7 @@ func (ctrl *RestController) Post(path string, handler func(session *Session)) {
 func (ctrl *RestController) Put(path string, handler func(session *Session)) {
 	PutPath := "PUT " + path
 
-	if ctrl.Router.TrimSlash {
+	if ctrl.Router.TrimSlash && path != "/" {
 		PutPath = strings.TrimSuffix(PutPath, "/")
 	}
 
@@ -49,7 +49,7 @@ func (ctrl *RestController) Put(path string, handler func(session *Session)) {
 func (ctrl *RestController) Delete(path string, handler func(session *Session)) {
 	DeletePath := "DELETE " + path
 
-	if ctrl.Router.TrimSlash {
+	if ctrl.Router.TrimSlash && path != "/" {
 		DeletePath = strings.TrimSuffix(DeletePath, "/")
 	}
 

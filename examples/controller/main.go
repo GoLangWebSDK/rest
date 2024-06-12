@@ -28,6 +28,8 @@ type UsersController struct {
 }
 
 func (ctrl *UsersController) Run() rest.Controller {
+
+	// Custom mapping to GET /api/users
 	//
 	// ctrl.Get("/", func(session *rest.Session) {
 	// 	fmt.Println("UsersController::Run::ReadAll")
