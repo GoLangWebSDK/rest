@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"fmt"
 	"net/http"
 )
 
@@ -45,7 +46,8 @@ func (ctrl *RestController) createHandler(path string, handler func(session *Ses
 }
 
 type Controller struct {
-	Router *Router
+	Router   *Router
+	Patterns []string
 }
 
 func New(router *Router) Controller {
@@ -55,13 +57,17 @@ func New(router *Router) Controller {
 }
 
 func (ctrl Controller) Get(path string, handler HandlerFunc) {
+	fmt.Println("Setting custom Get path")
 	GetPath := "GET " + ctrl.Router.CurrentRoute.FinalPath + path
+
 	ctrl.createHandler(GetPath, handler)
+	ctrl.Router.CurrentRoute.mappedPaths = append(ctrl.Router.CurrentRoute.mappedPaths, GetPath)
+
+	fmt.Println(ctrl.Router.CurrentRoute.mappedPaths)
 }
 
 func (ctrl Controller) Post(path string, handler func(session *Session)) {
 	PostPath := "POST " + ctrl.Router.CurrentRoute.FinalPath + path
-
 	ctrl.createHandler(PostPath, handler)
 }
 
@@ -83,7 +89,9 @@ func (ctrl Controller) createHandler(path string, handler func(session *Session)
 	ctrl.Router.CurrentRoute.SubRouter.HandleFunc(path, h)
 }
 
-func (ctrl Controller) Run() {}
+func (ctrl Controller) Run() Controller {
+	return ctrl
+}
 
 func (ctrl Controller) Create(session *Session) {}
 

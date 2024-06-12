@@ -14,11 +14,13 @@ type Router struct {
 	CurrentPath       string
 	CurrentPathPrefix string
 	CurrentHandler    RestHandler
+	TrimSlash         bool
 }
 
 func NewRouter() *Router {
 	return &Router{
-		Mux: http.NewServeMux(),
+		Mux:       http.NewServeMux(),
+		TrimSlash: true,
 	}
 }
 
@@ -37,6 +39,10 @@ func (router *Router) Use(middlewares ...Middleware) *Router {
 		router.HTTPHandler = mw(router.HTTPHandler)
 	}
 
+	return router
+}
+func (router *Router) StrictSlash(value bool) *Router {
+	router.TrimSlash = value
 	return router
 }
 

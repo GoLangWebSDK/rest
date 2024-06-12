@@ -10,7 +10,7 @@ type Routes interface {
 }
 
 type RestHandler interface {
-	Run()
+	Run() Controller
 	Create(*Session)
 	Read(*Session)
 	ReadAll(*Session)

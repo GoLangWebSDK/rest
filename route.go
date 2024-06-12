@@ -5,11 +5,12 @@ import (
 )
 
 type Route struct {
-	SubRouter  *http.ServeMux
-	Handler    RestHandler
-	Path       string
-	PathPrefix string
-	FinalPath  string
+	SubRouter   *http.ServeMux
+	Handler     RestHandler
+	Path        string
+	PathPrefix  string
+	FinalPath   string
+	mappedPaths []string
 }
 
 func NewRoute(router *Router) *Route {
@@ -37,45 +38,65 @@ func (route *Route) Map() {
 		route.FinalPath = route.PathPrefix + route.Path
 	}
 
-	route.Handler.Run()
+	ctrl := route.Handler.Run()
+	mappedPaths := ctrl.Router.CurrentRoute.mappedPaths
 
 	// POST
-	PostHandler := func(w http.ResponseWriter, r *http.Request) {
-		route.Handler.Create(NewSession(r, w))
-	}
-
 	PostPath := "POST " + route.FinalPath
-	route.SubRouter.HandleFunc(PostPath, PostHandler)
+
+	if !route.isRouteMapped(PostPath, mappedPaths...) {
+		PostHandler := func(w http.ResponseWriter, r *http.Request) {
+			route.Handler.Create(NewSession(r, w))
+		}
+		route.SubRouter.HandleFunc(PostPath, PostHandler)
+	}
 
 	// GET
-	GetHandler := func(w http.ResponseWriter, r *http.Request) {
-		route.Handler.Read(NewSession(r, w))
-	}
-
 	GetPath := "GET " + route.FinalPath + "/{id}"
-	route.SubRouter.HandleFunc(GetPath, GetHandler)
+
+	if !route.isRouteMapped(GetPath, mappedPaths...) {
+		GetHandler := func(w http.ResponseWriter, r *http.Request) {
+			route.Handler.Read(NewSession(r, w))
+		}
+		route.SubRouter.HandleFunc(GetPath, GetHandler)
+	}
 
 	// GET ALL
-	GetAllHandler := func(w http.ResponseWriter, r *http.Request) {
-		route.Handler.ReadAll(NewSession(r, w))
-	}
-
 	GetAllPath := "GET " + route.FinalPath
-	route.SubRouter.HandleFunc(GetAllPath, GetAllHandler)
+
+	if !route.isRouteMapped(GetAllPath, mappedPaths...) {
+		GetAllHandler := func(w http.ResponseWriter, r *http.Request) {
+			route.Handler.ReadAll(NewSession(r, w))
+		}
+		route.SubRouter.HandleFunc(GetAllPath, GetAllHandler)
+	}
 
 	// PUT
-	PutHandler := func(w http.ResponseWriter, r *http.Request) {
-		route.Handler.Update(NewSession(r, w))
-	}
-
 	PutPath := "PUT " + route.FinalPath + "/{id}"
-	route.SubRouter.HandleFunc(PutPath, PutHandler)
+
+	if !route.isRouteMapped(PutPath, mappedPaths...) {
+		PutHandler := func(w http.ResponseWriter, r *http.Request) {
+			route.Handler.Update(NewSession(r, w))
+		}
+		route.SubRouter.HandleFunc(PutPath, PutHandler)
+	}
 
 	// DELETE
-	DeleteHandler := func(w http.ResponseWriter, r *http.Request) {
-		route.Handler.Destroy(NewSession(r, w))
-	}
-
 	DeletePath := "DELETE " + route.FinalPath + "/{id}"
-	route.SubRouter.HandleFunc(DeletePath, DeleteHandler)
+
+	if !route.isRouteMapped(DeletePath, mappedPaths...) {
+		DeleteHandler := func(w http.ResponseWriter, r *http.Request) {
+			route.Handler.Destroy(NewSession(r, w))
+		}
+		route.SubRouter.HandleFunc(DeletePath, DeleteHandler)
+	}
+}
+
+func (route *Route) isRouteMapped(path string, mappedRoutes ...string) bool {
+	for _, mappedRoute := range mappedRoutes {
+		if path == mappedRoute {
+			return true
+		}
+	}
+	return false
 }

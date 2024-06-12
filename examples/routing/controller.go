@@ -17,7 +17,7 @@ func NewPostsController(router *rest.Router) *PostsController {
 	}
 }
 
-func (ctrl *PostsController) Run() {
+func (ctrl *PostsController) Run() rest.Controller {
 
 	ctrl.Post("/create", func(session *rest.Session) {
 		fmt.Println("Creating Post...")
@@ -132,4 +132,6 @@ func (ctrl *PostsController) Run() {
 
 		session.JsonResponse(http.StatusOK, jsonResponse)
 	})
+
+	return ctrl.Controller
 }

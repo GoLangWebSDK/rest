@@ -27,6 +27,24 @@ type UsersController struct {
 	rest.Controller
 }
 
+func (ctrl *UsersController) Run() rest.Controller {
+
+	ctrl.Get("", func(session *rest.Session) {
+		fmt.Println("UsersController::Run::ReadAll")
+
+		var jsonResponse struct {
+			Status bool   `json:"status"`
+			Msg    string `json:"msg"`
+		}
+
+		jsonResponse.Status = true
+		jsonResponse.Msg = "All users"
+		session.JsonResponse(http.StatusOK, jsonResponse)
+	})
+
+	return ctrl.Controller
+}
+
 func NewUsersController(router *rest.Router) *UsersController {
 	return &UsersController{
 		Controller: rest.New(router),
