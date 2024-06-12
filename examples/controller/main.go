@@ -29,7 +29,7 @@ type UsersController struct {
 
 func (ctrl *UsersController) Run() rest.Controller {
 
-	ctrl.Get("", func(session *rest.Session) {
+	ctrl.Get("/", func(session *rest.Session) {
 		fmt.Println("UsersController::Run::ReadAll")
 
 		var jsonResponse struct {
