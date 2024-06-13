@@ -394,7 +394,7 @@ func main() {
 
 ```
 
- e## Session 
+### Session 
 The REST session is a decorator around the `http.Request` and `http.ResponseWriter` that keeps all the data and some usefull methods for the current request in a single rest session. 
 
 ```go
