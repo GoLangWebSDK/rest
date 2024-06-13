@@ -18,7 +18,7 @@ func main() {
 		fmt.Fprintf(session.Response, "Hello World!")
 	})
 
-	ctrl.Get("/check", func(session *rest.Session) {
+	ctrl.Get("/check/", func(session *rest.Session) {
 		fmt.Fprintf(session.Response, "Route is working!")
 	})
 
