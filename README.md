@@ -393,3 +393,72 @@ func main() {
 }
 
 ```
+
+ e## Session 
+The REST session is a decorator around the `http.Request` and `http.ResponseWriter` that keeps all the data and some usefull methods for the current request in a single rest session. 
+
+```go
+
+    type Session struct {
+	    JsonDecoder *json.Decoder
+	    Request     *http.Request
+	    Response    http.ResponseWriter
+    }
+```
+Session will help when fetching path values from the request, it is also used to decode incoming request bodies and to repond with JSON responses woth proper status code. 
+
+```go
+	ctrl.Post("/users/create", func(session *rest.Session) {
+		fmt.Println("UsersController::Create")
+		var requestBody struct {
+			Username string `json:"username"`
+			Password string `json:"password"`
+		}
+
+		err := session.JsonDecode(&requestBody)
+		if err != nil {
+			session.SetStatus(http.StatusBadRequest)
+			return
+		}
+
+		if requestBody.Password == "" || requestBody.Username == "" {
+			session.SetStatus(http.StatusBadRequest)
+			return
+		}
+
+		var responseJson struct {
+			Status bool   `json:"status"`
+			Msg    string `json:"msg"`
+		}
+
+		responseJson.Status = true
+		responseJson.Msg = fmt.Sprintf("User %s created", requestBody.Username)
+
+		session.JsonResponse(http.StatusOK, responseJson)
+	})
+```
+
+`session.GetID()` - return the session ID as uint by defualt is will search for `{id}` in the URL path if no value is provided, but to fetch id's with custom name you just pass it in as value.
+
+```go
+
+    ctrl.Get("/{id}/posts/{post}", func(session *rest.Session) {
+        userID := session.GetID()
+        postID := session.GetID("post")
+    })
+
+```
+
+Any other parameter can be fetched using `session.GetParam("paramName")`. There are convenience methods the wrapp `GetParam` that return more common params like `slug` or `uuid` returned as strngs
+
+
+```go
+
+    ctrl.Get("/{uuid}/posts/{slug}", func(session *rest.Session) {
+        userUUID := session.GetUUID()
+        postSlug := session.GetSlug()
+    })
+
+```
+
+To set the status or the header of the reponse use `session.SetStatus` and `session.SetHeader`, `session.JsonResponse` will reponde with JSON, and Content-type will be set to `application/json`. 
