@@ -1,10 +1,10 @@
 REST
 ---
 
-REST Module allows you to quickly build controller based RESTfull API. It's built on top of `net/http` std lib server multiplexer so no additional dependencies are required.
+REST Module allows you to quickly build controller based RESTfull API. It's built on top of `net/http` std lib  multiplexer so no additional dependencies are required.
 
 ## Quick Start
-Quick example demonstrates how you can simply turn any struct into a rest controller by embbeding the base `rest.Controller` struct. The embbeding implements the `RestHandler` interface with the CRUD methods that are mapped to the request path. To implement custom CRUD handlers just overwrite the interface methods like in the example.
+Quick example demonstrates how you can simply turn any struct into a rest controller by embbeding the base `rest.Controller` struct. The embbeding implements the `RestHandler` interface with the CRUD methods that are mapped to the request paths. To implement custom CRUD handlers just overwrite the interface methods like in the example.
 
 Checkout the [examples](https://github.com/GoLangWebSDK/rest/tree/master/examples) for more working examples.
 
@@ -75,7 +75,7 @@ func (ctrl *UsersController) Destroy(ctx *rest.Context) {
 ```
 ## Controllers
 
-Rest module comes with 2 base controller you can use. 
+Rest module comes with 2 base controllers you can use. 
 
 - `Controller` - This is the base controller that all other controllers inherit from.
 - `RestController` - Helps you to express REST patterns as methods on a controller.
@@ -129,7 +129,7 @@ type RestHandler interface {
 	Destroy(*Session)
 }
 ```
-Every controller should inherit from this base controller to become the handler for the REST requests. There 2 general ways you can use it:
+Every controller should embbed `rest.Controller` to become the handler for the REST requests. There 2 general ways you can use it:
 
 Use the default methods (Create, Read, ReadAll, Update, Destroy)
 
@@ -176,7 +176,7 @@ func (ctrl *UsersController) Destroy(ctx *rest.Context) {
 }
 
 ```
-Use custom routing and metods by using 'Run() Controller' method where you can specify your own routing and handlers and overwrite the default methods as well. 
+Use custom routing and methods by using 'Run() Controller' to specify custom routes, handlers and overwrite the default handlers. 
 
 ```go
 
@@ -200,8 +200,8 @@ func (ctrl *UsersController) GetUser(ctx *rest.Context) {
 	fmt.Println("UsersController::GetUser")	
 }
 ```
-The `Run()` method is inspiried with ruby sintra framework that allows you to define your API in more functional way. So you can 
-build your API using only `Run() Controller` method and the Get, Post, Put and Delete methods.
+The `Run()` method is inspired by ruby sinatra framework that allows you to define your routing in a more DSL way.
+Build your API using only `Run() Controller` method and the Get, Post, Put and Delete handlers.
 
 ```go
 
@@ -241,18 +241,18 @@ func (ctrl *UsersController) Run() Controller {
 ```
 ## Routing
 
-You can then group and route the requests under a common route to your controller struct.
+Group and route the requests under a common path to your controller struct.
 
 ```go
     router.Route("/users").Controller(NewUsersController(router))
 ```
 
-Now all the requests with `/users` path prefix will be routed to the `NewUsersController` controller and all the routes in the controller
+Now all the requests with `/users` path prefix will be routed to the `UsersController` controller and all the routes in the controller
 will append `/users` with default or custom routes defined in the controller.
 
 
 ### Path Prefix
-If you need additional prefix to your routes you can use the `RoutePrefix()` method.
+If you need additional prefix for the routes use the `RoutePrefix()` method.
 
 ```go
 
@@ -263,7 +263,7 @@ If you need additional prefix to your routes you can use the `RoutePrefix()` met
 
 ```
 
-In addition to group and version API routes you can use convenience method `API()`.
+To group and verions API routes:
 
 ```go
     
@@ -276,7 +276,7 @@ In addition to group and version API routes you can use convenience method `API(
 
 ### Middlewares
 
-REST supports middlewares that can be used to intercept and modify the request and response.
+REST supports middleware that can be used to intercept and modify the request and response.
 
 
 ```go
@@ -295,7 +295,7 @@ REST supports middlewares that can be used to intercept and modify the request a
 ```
 
 ### Strict Slash
-To handle trailing slashes you can use `router.StrictSlash(false)`, defult is `true`.
+To handle trailing slashes use `router.StrictSlash(false)`, defult is `true`.
 
 ```go
     
@@ -305,7 +305,7 @@ To handle trailing slashes you can use `router.StrictSlash(false)`, defult is `t
 
 ```
 
-Active strict slash will strip all your routes that have a trailing slash and redirect them to their non-trailing version. When 
+Strict slash set to `true` will strip all your routes with a trailing slash and redirect them to their non-trailing version. When 
 set to `false` the routes will be left intact and you have to handle the trailing slash manually.
 
 Strict slash is true: 
@@ -326,7 +326,7 @@ You need to manually handle the trailing slash.
 ```
 
 ### Routes 
-REST module comes with `Routes` interface that allows you to load your controller routes and middlewares anywhere in your code base by implementing the interface. This way you can decouple your router config for a more MVC style app development.
+REST module comes with `Routes` interface that allows loasing controller routes and middlewares anywhere in the codebase by implementing the interface. 
 
 ```go
     type Routes interface {
@@ -334,7 +334,7 @@ REST module comes with `Routes` interface that allows you to load your controlle
 	    LoadMiddleware(*Router)
     }
 ```
-In your ie. `app.go` you can do:
+Ie. `app.go`:
 
 ```go
 
@@ -373,7 +373,7 @@ func (routes *Routes) LoadMiddleware(router *rest.Router) {
 }
 ```
 
-and then in your main.go you can do:
+`main.go`
 
 ```go
 
@@ -405,7 +405,7 @@ The REST session is a decorator around the `http.Request` and `http.ResponseWrit
 	    Response    http.ResponseWriter
     }
 ```
-Session will help when fetching path values from the request, it is also used to decode incoming request bodies and to repond with JSON responses woth proper status code. 
+Session allows fetching path values from the request, it is also used to decode incoming request bodies and to format JSON responses with proper status code. 
 
 ```go
 	ctrl.Post("/users/create", func(session *rest.Session) {
@@ -438,7 +438,7 @@ Session will help when fetching path values from the request, it is also used to
 	})
 ```
 
-`session.GetID()` - return the session ID as uint by defualt is will search for `{id}` in the URL path if no value is provided, but to fetch id's with custom name you just pass it in as value.
+`session.GetID()` - return the session ID as `uint`, will search for `{id}` in the URL path if no value is provided.
 
 ```go
 
@@ -448,9 +448,12 @@ Session will help when fetching path values from the request, it is also used to
     })
 
 ```
+- set the reponse status - `session.SetStatus` 
+- set response header  - `session.SetHeader`, 
+- reponde with JSON, and set Content-type `application/json` - `session.JsonResponse` 
+- fetch path parameters - `session.GetParam("paramName")`
 
-Any other parameter can be fetched using `session.GetParam("paramName")`. There are convenience methods the wrapp `GetParam` that return more common params like `slug` or `uuid` returned as strngs
-
+Fetch common params like `slug` or `uuid`:
 
 ```go
 
@@ -461,4 +464,3 @@ Any other parameter can be fetched using `session.GetParam("paramName")`. There 
 
 ```
 
-To set the status or the header of the reponse use `session.SetStatus` and `session.SetHeader`, `session.JsonResponse` will reponde with JSON, and Content-type will be set to `application/json`. 
