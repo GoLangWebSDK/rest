@@ -17,42 +17,22 @@ func NewController(router *Router) RestController {
 }
 
 func (ctrl *RestController) Get(path string, handler HandlerFunc) {
-	GetPath := "GET " + path
-
-	if ctrl.Router.TrimSlash && path != "/" {
-		GetPath = strings.TrimSuffix(GetPath, "/")
-	}
-
+	GetPath := ctrl.buildPath("GET", path)
 	ctrl.createHandler(GetPath, handler)
 }
 
 func (ctrl *RestController) Post(path string, handler func(session *Session)) {
-	PostPath := "POST " + path
-
-	if ctrl.Router.TrimSlash && path != "/" {
-		PostPath = strings.TrimSuffix(PostPath, "/")
-	}
-
+	PostPath := ctrl.buildPath("POST", path)
 	ctrl.createHandler(PostPath, handler)
 }
 
 func (ctrl *RestController) Put(path string, handler func(session *Session)) {
-	PutPath := "PUT " + path
-
-	if ctrl.Router.TrimSlash && path != "/" {
-		PutPath = strings.TrimSuffix(PutPath, "/")
-	}
-
+	PutPath := ctrl.buildPath("PUT", path)
 	ctrl.createHandler(PutPath, handler)
 }
 
 func (ctrl *RestController) Delete(path string, handler func(session *Session)) {
-	DeletePath := "DELETE " + path
-
-	if ctrl.Router.TrimSlash && path != "/" {
-		DeletePath = strings.TrimSuffix(DeletePath, "/")
-	}
-
+	DeletePath := ctrl.buildPath("DELETE", path)
 	ctrl.createHandler(DeletePath, handler)
 }
 
@@ -62,6 +42,16 @@ func (ctrl *RestController) createHandler(path string, handler func(session *Ses
 	}
 
 	ctrl.Router.Mux.HandleFunc(path, h)
+}
+
+func (ctrl *RestController) buildPath(method string, path string) string {
+	route := method + " " + path
+
+	if ctrl.Router.TrimSlash && path != "/" {
+		route = strings.TrimSuffix(route, "/")
+	}
+
+	return route
 }
 
 type Controller struct {
@@ -75,47 +65,35 @@ func New(router *Router) Controller {
 }
 
 func (ctrl Controller) Get(path string, handler HandlerFunc) {
-	GetPath := "GET " + ctrl.Router.CurrentRoute.FinalPath + path
-
-	if ctrl.Router.TrimSlash {
-		GetPath = strings.TrimSuffix(GetPath, "/")
-	}
-
+	GetPath := ctrl.buildPath("GET", path)
 	ctrl.createHandler(GetPath, handler)
-	ctrl.Router.CurrentRoute.mappedPaths = append(ctrl.Router.CurrentRoute.mappedPaths, GetPath)
 }
 
 func (ctrl Controller) Post(path string, handler func(session *Session)) {
-	PostPath := "POST " + ctrl.Router.CurrentRoute.FinalPath + path
-
-	if ctrl.Router.TrimSlash {
-		PostPath = strings.TrimSuffix(PostPath, "/")
-	}
-
+	PostPath := ctrl.buildPath("POST", path)
 	ctrl.createHandler(PostPath, handler)
-	ctrl.Router.CurrentRoute.mappedPaths = append(ctrl.Router.CurrentRoute.mappedPaths, PostPath)
 }
 
 func (ctrl Controller) Put(path string, handler func(session *Session)) {
-	PutPath := "PUT " + ctrl.Router.CurrentRoute.FinalPath + path
-
-	if ctrl.Router.TrimSlash {
-		PutPath = strings.TrimSuffix(PutPath, "/")
-	}
-
+	PutPath := ctrl.buildPath("PUT", path)
 	ctrl.createHandler(PutPath, handler)
-	ctrl.Router.CurrentRoute.mappedPaths = append(ctrl.Router.CurrentRoute.mappedPaths, PutPath)
 }
 
 func (ctrl Controller) Delete(path string, handler func(session *Session)) {
-	DeletePath := "DELETE " + ctrl.Router.CurrentRoute.FinalPath + path
+	DeletePath := ctrl.buildPath("DELETE", path)
+	ctrl.createHandler(DeletePath, handler)
+}
+
+func (ctrl Controller) buildPath(method string, path string) string {
+	route := method + " " + ctrl.Router.CurrentRoute.FinalPath + path
 
 	if ctrl.Router.TrimSlash {
-		DeletePath = strings.TrimSuffix(DeletePath, "/")
+		route = strings.TrimSuffix(route, "/")
 	}
 
-	ctrl.createHandler(DeletePath, handler)
-	ctrl.Router.CurrentRoute.mappedPaths = append(ctrl.Router.CurrentRoute.mappedPaths, DeletePath)
+	ctrl.Router.CurrentRoute.mappedPaths = append(ctrl.Router.CurrentRoute.mappedPaths, route)
+
+	return route
 }
 
 func (ctrl Controller) createHandler(path string, handler func(session *Session)) {
